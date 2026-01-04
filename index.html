@@ -50,9 +50,7 @@
     body{
       margin:0;
       font-family:var(--font);
-      background: radial-gradient(1200px 800px at 20% -10%, rgba(122,167,255,.18), transparent 60%),
-                  radial-gradient(900px 600px at 90% 10%, rgba(155,125,255,.14), transparent 55%),
-                  var(--bg);
+      background: var(--bg);
       color:var(--text);
     }
     .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 34px;}
@@ -117,7 +115,7 @@
     .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
     .row .k{color:var(--muted);font-size:12px;font-weight:750}
     .row .v{font-family:var(--mono);font-size:12px;font-weight:750}
-    .chartWrap{padding:12px;border-radius:16px;background: linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.10));border:1px solid var(--border)}
+    .chartWrap{padding:12px;border-radius:16px;background: linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.10));border:1px solid var(--border);position:relative}
     .chartHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;flex-wrap:wrap}
     .chartHead h2{margin:0;font-size:14px;font-weight:850;letter-spacing:.2px}
     .status{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;border:1px solid var(--border);background: rgba(0,0,0,.16);width:max-content}
@@ -263,10 +261,10 @@
             </div>
 
             <svg class="svgBox" id="chart" viewBox="0 0 1000 320" preserveAspectRatio="none" role="img" aria-label="Hintakäyrä"></svg>
+            <div id="chartTooltip" style="display:none;position:absolute;background:rgba(10,18,35,.95);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:12px;pointer-events:none;z-index:100;backdrop-filter:blur(10px);box-shadow:0 4px 12px rgba(0,0,0,.3)"></div>
 
             <div class="legend" aria-hidden="true">
               <div class="item"><span class="line"></span> Hinta</div>
-              <div class="item"><span class="mark"></span> Nykyhetki</div>
             </div>
           </div>
 
@@ -338,6 +336,7 @@
       expList: el('expList'),
       tiles: el('tiles'),
       chart: el('chart'),
+      chartTooltip: el('chartTooltip'),
       statusText: el('statusText'),
       spin: el('spin'),
       toast: el('toast'),
@@ -580,6 +579,45 @@
         <text x="${padL-10}" y="${y(max)+5}" fill="rgba(255,255,255,.80)" font-size="14" font-weight="700" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${formatPrice(max)}</text>
         <text x="${padL-10}" y="${y(min)+5}" fill="rgba(255,255,255,.80)" font-size="14" font-weight="700" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${formatPrice(min)}</text>
       `;
+      
+      // Lisätään interaktiivisuus - tooltip näyttää hinnan koskettaessa/hoverissa
+      const chartRect = ui.chart.getBoundingClientRect();
+      
+      const showTooltipForPoint = (clientX, clientY) => {
+        const svgX = ((clientX - chartRect.left) / chartRect.width) * W;
+        
+        if(svgX < padL || svgX > W - padR) {
+          ui.chartTooltip.style.display = 'none';
+          return;
+        }
+        
+        // Laske lähin datapiste
+        const dataIndex = Math.round(((svgX - padL) / w) * (entries.length - 1));
+        if(dataIndex < 0 || dataIndex >= entries.length) {
+          ui.chartTooltip.style.display = 'none';
+          return;
+        }
+        
+        const point = entries[dataIndex];
+        ui.chartTooltip.innerHTML = `
+          <div style="font-weight:800;color:var(--accent);margin-bottom:4px">${formatPrice(point.price)} snt/kWh</div>
+          <div style="font-size:11px;color:var(--muted)">${formatFiTime(point.start)}</div>
+        `;
+        ui.chartTooltip.style.display = 'block';
+        ui.chartTooltip.style.left = `${clientX + 10}px`;
+        ui.chartTooltip.style.top = `${clientY - 60}px`;
+      };
+      
+      ui.chart.addEventListener('mousemove', (e) => showTooltipForPoint(e.clientX, e.clientY));
+      ui.chart.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        showTooltipForPoint(touch.clientX, touch.clientY);
+      });
+      ui.chart.addEventListener('mouseleave', () => ui.chartTooltip.style.display = 'none');
+      ui.chart.addEventListener('touchend', () => ui.chartTooltip.style.display = 'none');
+      
+      console.log('🔧 DEBUG: Graafi-interaktiivisuus lisätty');
     }
 
     function render(){
