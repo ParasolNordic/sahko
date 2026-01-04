@@ -150,11 +150,10 @@
     .tiles{display:flex;flex-direction:column;gap:6px}
     .tile{
       border-radius:12px;border:1px solid var(--border);padding:12px 16px;background: rgba(0,0,0,.16);
-      min-width:0;display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:12px;
+      min-width:0;display:flex;flex-direction:row;justify-content:flex-start;align-items:center;gap:16px;
       opacity:0;
       animation: fadeIn 0.3s ease-out forwards;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
-      border-left-width:4px;
     }
     .tile:hover{
       transform: translateX(4px);
@@ -164,9 +163,9 @@
       from{opacity:0;transform:translateY(8px)}
       to{opacity:1;transform:translateY(0)}
     }
-    .tile .time{font-family:var(--mono);font-size:13px;font-weight:800;color:rgba(232,238,252,.95);white-space:nowrap;min-width:0;flex:1}
-    .tile .val{font-family:var(--mono);font-size:15px;font-weight:950;display:flex;align-items:baseline;gap:6px;min-width:0;white-space:nowrap}
-    .tile .val small{font-size:10px;font-weight:850;color:rgba(232,238,252,.82);white-space:nowrap}
+    .tile .time{font-family:var(--mono);font-size:14px;font-weight:800;color:rgba(232,238,252,.95);white-space:nowrap;min-width:140px}
+    .tile .val{font-family:var(--mono);font-size:16px;font-weight:950;display:flex;align-items:baseline;gap:6px;min-width:0;white-space:nowrap;margin-left:auto}
+    .tile .val small{font-size:11px;font-weight:850;color:rgba(232,238,252,.75);white-space:nowrap}
     .tile[aria-current="true"]{outline:2px solid rgba(122,167,255,.7);box-shadow: 0 0 0 6px rgba(122,167,255,.15)}
     .foot{margin-top:12px;color:var(--muted);font-size:12px;line-height:1.4;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center}
     .toast{
@@ -276,6 +275,16 @@
 
       <aside class="card">
         <div class="inner list">
+          <div class="heat">
+            <div class="heatHead">
+              <h2>Tuntilista</h2>
+              <div class="hint">Väri = suhteellinen hinta</div>
+            </div>
+            <div class="tiles" id="tiles" aria-label="Tuntikohtaiset hinnat"></div>
+          </div>
+
+          <div style="height:20px"></div>
+
           <h2>Ääriarvot valitulta aikaväliltä</h2>
           <div class="cols">
             <div class="mini">
@@ -286,16 +295,6 @@
               <h3>Kalleimmat</h3>
               <ul id="expList"></ul>
             </div>
-          </div>
-
-          <div style="height:12px"></div>
-
-          <div class="heat">
-            <div class="heatHead">
-              <h2>Tuntilista</h2>
-              <div class="hint">Väri = suhteellinen hinta</div>
-            </div>
-            <div class="tiles" id="tiles" aria-label="Tuntikohtaiset hinnat"></div>
           </div>
         </div>
       </aside>
@@ -744,7 +743,6 @@
         const tile = document.createElement('button');
         tile.type = 'button';
         tile.className = 'tile';
-        tile.style.borderLeftColor = tileBorder(e.price, hourlyStats.q1, hourlyStats.q3);
         tile.style.animationDelay = `${i * 0.02}s`; // Staggered animation
         tile.setAttribute('aria-label', `${formatFiTime(e.start)}: ${formatPrice(e.price)} snt / kWh`);
         
@@ -755,6 +753,8 @@
         
         const valDiv = document.createElement('div');
         valDiv.className = 'val';
+        // Lisää väri hintatekstiin
+        valDiv.style.color = tileBorder(e.price, hourlyStats.q1, hourlyStats.q3);
         valDiv.textContent = formatPrice(e.price) + ' ';
         
         const smallEl = document.createElement('small');
