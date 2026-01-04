@@ -149,27 +149,25 @@
     .heatHead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     .heatHead h2{margin:0;font-size:14px;font-weight:850}
     .heatHead .hint{color:var(--muted);font-size:12px;font-weight:750}
-    .tiles{display:grid;grid-template-columns: repeat(4, 1fr);gap:8px}
-    @media (min-width:520px){.tiles{grid-template-columns: repeat(6, 1fr)}}
-    @media (min-width:860px){.tiles{grid-template-columns: repeat(8, 1fr)}}
+    .tiles{display:flex;flex-direction:column;gap:6px}
     .tile{
-      border-radius:14px;border:1px solid var(--border);padding:10px;background: rgba(0,0,0,.16);
-      min-height:74px;display:flex;flex-direction:column;justify-content:space-between;gap:8px;
-      min-width:0;
+      border-radius:12px;border:1px solid var(--border);padding:12px 16px;background: rgba(0,0,0,.16);
+      min-width:0;display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:12px;
       opacity:0;
       animation: fadeIn 0.3s ease-out forwards;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
+      border-left-width:4px;
     }
     .tile:hover{
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,.35);
+      transform: translateX(4px);
+      box-shadow: 0 2px 8px rgba(0,0,0,.25);
     }
     @keyframes fadeIn{
       from{opacity:0;transform:translateY(8px)}
       to{opacity:1;transform:translateY(0)}
     }
-    .tile .time{font-family:var(--mono);font-size:11px;font-weight:800;color:rgba(232,238,252,.90);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-    .tile .val{font-family:var(--mono);font-size:12px;font-weight:950;display:flex;align-items:baseline;gap:6px;min-width:0;flex-wrap:wrap}
+    .tile .time{font-family:var(--mono);font-size:13px;font-weight:800;color:rgba(232,238,252,.95);white-space:nowrap;min-width:0;flex:1}
+    .tile .val{font-family:var(--mono);font-size:15px;font-weight:950;display:flex;align-items:baseline;gap:6px;min-width:0;white-space:nowrap}
     .tile .val small{font-size:10px;font-weight:850;color:rgba(232,238,252,.82);white-space:nowrap}
     .tile[aria-current="true"]{outline:2px solid rgba(122,167,255,.7);box-shadow: 0 0 0 6px rgba(122,167,255,.15)}
     .foot{margin-top:12px;color:var(--muted);font-size:12px;line-height:1.4;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center}
@@ -196,8 +194,7 @@
   <div class="wrap">
     <header>
       <div class="title">
-        <h1>Pörssisähkö – varttihinnat</h1>
-        <p>Ajat näytetään Suomen ajassa. Data tulee ensisijaisesti <span class="t">/data/latest-prices.json</span> (GitHub Action), varalla suora API.</p>
+        <h1>Pörssisähkö</h1>
       </div>
 
       <div class="actions">
@@ -209,7 +206,6 @@
           <button data-range="6"  aria-pressed="false">6h</button>
           <button data-range="12" aria-pressed="false">12h</button>
           <button data-range="24" aria-pressed="true">24h</button>
-          <button data-range="48" aria-pressed="false">48h</button>
         </div>
         <button id="refreshBtn" title="Päivitä">Päivitä</button>
       </div>
@@ -302,7 +298,7 @@
 
           <div class="heat">
             <div class="heatHead">
-              <h2>Tuntiruudukko</h2>
+              <h2>Tuntilista</h2>
               <div class="hint">Väri = suhteellinen hinta</div>
             </div>
             <div class="tiles" id="tiles" aria-label="Tuntikohtaiset hinnat"></div>
@@ -415,9 +411,6 @@
       return 'mid';
     }
 
-    function setLoading(isLoading, text){
-      ui.statusText.textContent = text || (isLoading ? 'Ladataan…' : 'Valmis');
-      ui.spin.style.display = isLoading ? 'inline-block' : 'none';
     }
 
     function parsePrices(raw){
@@ -563,7 +556,15 @@
       if(now.getTime() >= startT && now.getTime() <= endT){
         const t = (now.getTime()-startT)/(endT-startT || 1);
         const nx = padL + t*w;
-        nowMarkup = `<line x1="${nx}" y1="${padT}" x2="${nx}" y2="${H-padB}" stroke="rgba(155,125,255,.35)" stroke-width="2" />`;
+        // Näkyvämpi nykyhetki-viiva + label
+        nowMarkup = `
+          <line x1="${nx}" y1="${padT}" x2="${nx}" y2="${H-padB}" stroke="rgba(155,125,255,.75)" stroke-width="3" stroke-dasharray="6,4" />
+          <circle cx="${nx}" cy="${padT-5}" r="5" fill="rgba(155,125,255,.9)" />
+          <text x="${nx}" y="${padT-10}" fill="rgba(155,125,255,.95)" font-size="11" text-anchor="middle" font-weight="800">NYT</text>
+        `;
+        console.log('🔧 DEBUG: Nykyhetki näkyy graafissa');
+      } else {
+        console.log('🔧 DEBUG: Nykyhetki ei ole tässä aikaikkunassa');
       }
 
       const startLbl = formatFiTime(entries[0].start);
@@ -576,10 +577,10 @@
         ${nowMarkup}
         <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(255,255,255,.10)" stroke-width="1.5" />
         <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(255,255,255,.10)" stroke-width="1.5" />
-        <text x="${padL}" y="${H-18}" fill="rgba(255,255,255,.55)" font-size="12" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${startLbl}</text>
-        <text x="${W-padR}" y="${H-18}" fill="rgba(255,255,255,.55)" font-size="12" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${endLbl}</text>
-        <text x="${padL-10}" y="${y(max)+4}" fill="rgba(255,255,255,.55)" font-size="12" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${formatPrice(max)}</text>
-        <text x="${padL-10}" y="${y(min)+4}" fill="rgba(255,255,255,.55)" font-size="12" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${formatPrice(min)}</text>
+        <text x="${padL}" y="${H-18}" fill="rgba(255,255,255,.65)" font-size="13" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${startLbl}</text>
+        <text x="${W-padR}" y="${H-18}" fill="rgba(255,255,255,.65)" font-size="13" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${endLbl}</text>
+        <text x="${padL-10}" y="${y(max)+5}" fill="rgba(255,255,255,.80)" font-size="14" font-weight="700" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${formatPrice(max)}</text>
+        <text x="${padL-10}" y="${y(min)+5}" fill="rgba(255,255,255,.80)" font-size="14" font-weight="700" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${formatPrice(min)}</text>
       `;
     }
 
@@ -686,8 +687,7 @@
         const tile = document.createElement('button');
         tile.type = 'button';
         tile.className = 'tile';
-        tile.style.background = tileBg(e.price, hourlyStats.q1, hourlyStats.q3);
-        tile.style.borderColor = tileBorder(e.price, hourlyStats.q1, hourlyStats.q3);
+        tile.style.borderLeftColor = tileBorder(e.price, hourlyStats.q1, hourlyStats.q3);
         tile.style.animationDelay = `${i * 0.02}s`; // Staggered animation
         tile.setAttribute('aria-label', `${formatFiTime(e.start)}: ${formatPrice(e.price)} snt / kWh`);
         
@@ -827,6 +827,12 @@
     function setLoading(isLoading, text){
       ui.statusText.textContent = text || (isLoading ? 'Ladataan…' : 'Valmis');
       ui.spin.style.display = isLoading ? 'inline-block' : 'none';
+      // Piilotetaan status-box kun valmis
+      const statusBox = document.getElementById('statusBox');
+      if(statusBox){
+        statusBox.style.display = isLoading ? 'flex' : 'none';
+      }
+      console.log('🔧 DEBUG: Loading status:', isLoading, text);
     }
 
     // Buttons: mode
