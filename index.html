@@ -245,7 +245,10 @@
 
           <div class="foot">
             <div>Huom: huomisen hinnat näkyvät yleensä vasta kun ne ovat julkaistu (tyypillisesti iltapäivällä).</div>
-            <div><span class="t">Lähde:</span> <span class="t" id="sourceLabel">—</span></div>
+            <div>
+              <span class="t">Lähde:</span> <span class="t" id="sourceLabel">—</span>
+              <span class="t" id="rateLimitInfo" style="margin-left:8px;color:var(--muted)"></span>
+            </div>
           </div>
         </div>
       </section>
@@ -311,14 +314,16 @@
       statusText: el('statusText'),
       spin: el('spin'),
       toast: el('toast'),
-      sourceLabel: el('sourceLabel')
+      sourceLabel: el('sourceLabel'),
+      rateLimitInfo: el('rateLimitInfo')
     };
 
     let state = {
       all: [],
       mode: 'future',    // 'future' | 'past'
       rangeHours: 24,
-      lastUpdated: null
+      lastUpdated: null,
+      rateLimit: null
     };
 
     function showToast(msg){
@@ -671,13 +676,46 @@
     }
 
     async function fetchJson(url){
+      console.log('🔧 DEBUG: Haetaan:', url);
       const res = await fetch(url, { cache: 'no-store' });
-      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      
+      // Lue rate limit -headerit jos saatavilla
+      const rateLimit = res.headers.get('X-RateLimit-Limit');
+      const rateRemaining = res.headers.get('X-RateLimit-Remaining');
+      const rateReset = res.headers.get('X-RateLimit-Reset');
+      
+      if(rateLimit || rateRemaining || rateReset){
+        console.log('🔧 DEBUG: API Rate Limit:');
+        console.log('  - Limit:', rateLimit || 'N/A');
+        console.log('  - Remaining:', rateRemaining || 'N/A');
+        console.log('  - Reset:', rateReset ? new Date(parseInt(rateReset) * 1000) : 'N/A');
+        
+        // Tallenna state-objektiin
+        state.rateLimit = {
+          limit: rateLimit ? parseInt(rateLimit) : null,
+          remaining: rateRemaining ? parseInt(rateRemaining) : null,
+          reset: rateReset ? new Date(parseInt(rateReset) * 1000) : null
+        };
+        
+        // Varoitus jos lähellä rajaa
+        if(rateRemaining && parseInt(rateRemaining) < 10){
+          console.warn('⚠️ DEBUG: API rate limit lähes täynnä! Jäljellä:', rateRemaining);
+        }
+      } else {
+        console.log('🔧 DEBUG: Ei rate limit -headereja (normaalia paikalliselle tiedostolle)');
+      }
+      
+      if(!res.ok) {
+        console.error('🔧 DEBUG: HTTP virhe:', res.status, res.statusText);
+        throw new Error(`HTTP ${res.status}`);
+      }
+      
       return res.json();
     }
 
     async function loadData(force){
       setLoading(true, 'Haetaan…');
+      console.log('🔧 DEBUG: loadData aloitus, force:', force);
 
       // 1) Prefer local file (works on GitHub Pages always)
       try{
@@ -689,11 +727,12 @@
           ui.updatedAt.textContent = formatFiTime(state.lastUpdated);
           ui.sourceLabel.textContent = 'local (/data/latest-prices.json)';
           setLoading(false, 'Valmis');
+          console.log('🔧 DEBUG: Data ladattu paikallisesta tiedostosta, rivejä:', parsed.length);
           render();
           return;
         }
-      } catch (_) {
-        // ignore and try API
+      } catch (err) {
+        console.log('🔧 DEBUG: Paikallinen tiedosto ei saatavilla:', err.message);
       }
 
       // 2) Try direct API (may fail due to CORS in browser)
@@ -706,12 +745,41 @@
         ui.updatedAt.textContent = formatFiTime(state.lastUpdated);
         ui.sourceLabel.textContent = 'API (direct)';
         setLoading(false, 'Valmis');
+        console.log('🔧 DEBUG: Data ladattu API:sta, rivejä:', parsed.length);
+        
+        // Näytä rate limit info jos saatavilla
+        if(state.rateLimit && state.rateLimit.remaining !== null){
+          console.log('📊 API-pyyntöjä jäljellä:', state.rateLimit.remaining);
+          ui.rateLimitInfo.textContent = `(API: ${state.rateLimit.remaining}/${state.rateLimit.limit || '?'} jäljellä)`;
+          
+          if(state.rateLimit.remaining < 10){
+            showToast(`Varoitus: API-pyyntöjä jäljellä vain ${state.rateLimit.remaining}`);
+            ui.rateLimitInfo.style.color = 'var(--warn)';
+          } else if(state.rateLimit.remaining < 5){
+            ui.rateLimitInfo.style.color = 'var(--bad)';
+          }
+        } else {
+          ui.rateLimitInfo.textContent = '';
+        }
+        
         render();
         return;
       } catch (err){
+        console.error('🔧 DEBUG: API-haku epäonnistui:', err);
         setLoading(false, 'Virhe');
         ui.sourceLabel.textContent = '—';
-        showToast(`Datan haku epäonnistui (todennäköisesti CORS). Ota GitHub Action käyttöön. (${err.message || err})`);
+        
+        // Tarkempi virheilmoitus
+        let errorMsg = 'Datan haku epäonnistui';
+        if(err.message.includes('CORS') || err.name === 'TypeError'){
+          errorMsg += ' (CORS-esto). Ota GitHub Action käyttöön.';
+        } else if(err.message.includes('429')){
+          errorMsg += ' (API rate limit täynnä). Yritä myöhemmin uudelleen.';
+        } else {
+          errorMsg += `: ${err.message}`;
+        }
+        
+        showToast(errorMsg);
       }
     }
 
