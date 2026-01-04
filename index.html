@@ -556,6 +556,20 @@
       // Tiles
       console.log('🔧 DEBUG: Renderöidään tiles, määrä:', window.length);
       ui.tiles.innerHTML = '';
+      
+      // Debug parent widths
+      const debugElement = (el, name) => {
+        console.log(`🔧 DEBUG: ${name} - offsetWidth: ${el.offsetWidth}, clientWidth: ${el.clientWidth}, scrollWidth: ${el.scrollWidth}`);
+        const computed = window.getComputedStyle(el);
+        console.log(`🔧 DEBUG: ${name} - width: ${computed.width}, max-width: ${computed.maxWidth}, box-sizing: ${computed.boxSizing}`);
+      };
+      
+      debugElement(ui.tiles, 'tiles');
+      debugElement(ui.tiles.parentElement, 'tiles.parent (.heat)');
+      debugElement(ui.tiles.parentElement.parentElement, 'tiles.parent.parent');
+      debugElement(document.querySelector('.grid'), 'grid');
+      debugElement(document.querySelector('.wrap'), 'wrap');
+      
       for(const e of window){
         const tile = document.createElement('button');
         tile.type = 'button';
