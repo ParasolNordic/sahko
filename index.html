@@ -80,7 +80,7 @@
     .seg{display:flex;background: rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px;padding:4px;gap:4px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
     .seg button{padding:8px 10px;border-radius:10px;border:0;box-shadow:none;background:transparent;color:var(--muted);font-weight:750;white-space:nowrap;flex-shrink:0}
     .seg button[aria-pressed="true"]{background: linear-gradient(180deg, rgba(122,167,255,.25), rgba(122,167,255,.12));color:var(--text)}
-    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px;width:100%;min-width:0}
     @media (min-width: 860px){
       .grid{grid-template-columns: 1.25fr .75fr;gap:14px}
       .title h1{font-size:20px}
@@ -91,8 +91,10 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
+      width:100%;
+      min-width:0;
     }
-    .card .inner{padding:14px}
+    .card .inner{padding:14px;width:100%;min-width:0}
     .now{display:grid;grid-template-columns:1fr;gap:10px}
     @media (min-width: 520px){.now{grid-template-columns: 1.1fr .9fr;align-items:stretch}}
     .big{
@@ -136,11 +138,11 @@
     .t{font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:750}
     .p{font-family:var(--mono);font-size:12px;font-weight:900}
     .p.good{color:var(--ok)} .p.bad{color:var(--bad)} .p.mid{color:var(--warn)}
-    .heat{display:flex;flex-direction:column;gap:10px}
+    .heat{display:flex;flex-direction:column;gap:10px;width:100%;min-width:0}
     .heatHead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     .heatHead h2{margin:0;font-size:14px;font-weight:850}
     .heatHead .hint{color:var(--muted);font-size:12px;font-weight:750}
-    .tiles{display:grid;grid-template-columns: repeat(4, 1fr);gap:8px}
+    .tiles{display:grid;grid-template-columns: repeat(4, 1fr);gap:8px;width:100%;min-width:0}
     @media (min-width:520px){.tiles{grid-template-columns: repeat(6, 1fr)}}
     @media (min-width:860px){.tiles{grid-template-columns: repeat(8, 1fr)}}
     .tile{
