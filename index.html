@@ -378,14 +378,42 @@
     }
 
     function parsePrices(raw){
-      const arr = (raw && raw.prices) ? raw.prices : [];
-      return arr.map(x => ({
-          price: Number(x.price),
-          start: new Date(x.startDate),
-          end: new Date(x.endDate),
+      console.log('🔧 DEBUG: Validoidaan data');
+      
+      // Validoi että raw on objekti ja prices on array
+      if(!raw || typeof raw !== 'object' || !Array.isArray(raw.prices)){
+        console.error('🔧 DEBUG: Virheellinen data-rakenne', raw);
+        return [];
+      }
+      
+      const arr = raw.prices;
+      const parsed = arr.map(x => {
+        // Validoi että price on numero
+        const price = Number(x.price);
+        if(!Number.isFinite(price)){
+          console.warn('🔧 DEBUG: Virheellinen hinta:', x);
+          return null;
+        }
+        
+        // Validoi päivämäärät
+        const start = new Date(x.startDate);
+        const end = new Date(x.endDate);
+        if(isNaN(start) || isNaN(end)){
+          console.warn('🔧 DEBUG: Virheellinen päivämäärä:', x);
+          return null;
+        }
+        
+        return {
+          price: price,
+          start: start,
+          end: end,
           startIso: x.startDate,
           endIso: x.endDate
-      })).filter(x => Number.isFinite(x.price) && !isNaN(x.start));
+        };
+      }).filter(x => x !== null);
+      
+      console.log('🔧 DEBUG: Validoitu', parsed.length, 'hintaa');
+      return parsed;
     }
 
     function aggregateToHours(quarters){
@@ -546,8 +574,14 @@
         if(next){
           ui.nowLabel.textContent = 'Seuraava hinta (lähin vartti)';
           ui.nowPrice.textContent = formatPrice(next.price);
-          ui.trendText.innerHTML = `<b>${formatFiTime(next.start)}</b> · alkaa`;
+          // Turvallinen rakentaminen ilman innerHTML
+          const time = document.createElement('b');
+          time.textContent = formatFiTime(next.start);
+          ui.trendText.textContent = '';
+          ui.trendText.appendChild(time);
+          ui.trendText.appendChild(document.createTextNode(' · alkaa'));
           ui.trendDot.style.background = 'var(--accent2)';
+          console.log('🔧 DEBUG: Seuraava hinta asetettu turvallisesti');
         } else {
           ui.nowLabel.textContent = 'Seuraava hinta';
           ui.nowPrice.textContent = '—';
@@ -558,21 +592,45 @@
         const last = window[window.length-1];
         ui.nowLabel.textContent = 'Hinta (viimeisin vartti ikkunassa)';
         ui.nowPrice.textContent = formatPrice(last.price);
-        ui.trendText.innerHTML = `<b>${formatFiTime(last.start)}</b> · päättyy ${formatFiTime(last.end)}`;
+        // Turvallinen rakentaminen
+        const timeStart = document.createElement('b');
+        timeStart.textContent = formatFiTime(last.start);
+        ui.trendText.textContent = '';
+        ui.trendText.appendChild(timeStart);
+        ui.trendText.appendChild(document.createTextNode(' · päättyy ' + formatFiTime(last.end)));
         ui.trendDot.style.background = 'var(--accent)';
+        console.log('🔧 DEBUG: Viimeisin hinta asetettu turvallisesti');
       }
 
-      // Top lists
+      // Top lists - turvalliset DOM-elementit
       const sorted = [...window].sort((a,b)=>a.price-b.price);
       const cheapest = sorted.slice(0, 8);
       const expensive = sorted.slice(-8).reverse();
-      const liHtml = (e, cls) => `
-        <li>
-          <span class="t">${formatFiTime(e.start)}</span>
-          <span class="p ${cls}">${formatPrice(e.price)}</span>
-        </li>`;
-      ui.cheapList.innerHTML = cheapest.map(e => liHtml(e, priceClass(e.price, stats.q1, stats.q3))).join('');
-      ui.expList.innerHTML = expensive.map(e => liHtml(e, priceClass(e.price, stats.q1, stats.q3))).join('');
+      
+      const createListItem = (e, cls) => {
+        const li = document.createElement('li');
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 't';
+        timeSpan.textContent = formatFiTime(e.start);
+        const priceSpan = document.createElement('span');
+        priceSpan.className = `p ${cls}`;
+        priceSpan.textContent = formatPrice(e.price);
+        li.appendChild(timeSpan);
+        li.appendChild(priceSpan);
+        return li;
+      };
+      
+      ui.cheapList.innerHTML = '';
+      cheapest.forEach(e => {
+        ui.cheapList.appendChild(createListItem(e, priceClass(e.price, stats.q1, stats.q3)));
+      });
+      
+      ui.expList.innerHTML = '';
+      expensive.forEach(e => {
+        ui.expList.appendChild(createListItem(e, priceClass(e.price, stats.q1, stats.q3)));
+      });
+      
+      console.log('🔧 DEBUG: Listat luotu turvallisesti');
 
       // Tiles - aggregoi tunteiksi
       const hourlyData = aggregateToHours(window);
@@ -587,13 +645,27 @@
         tile.style.background = tileBg(e.price, hourlyStats.q1, hourlyStats.q3);
         tile.style.borderColor = tileBorder(e.price, hourlyStats.q1, hourlyStats.q3);
         tile.setAttribute('aria-label', `${formatFiTime(e.start)}: ${formatPrice(e.price)} snt / kWh`);
-        tile.innerHTML = `
-          <div class="time">${formatFiTime(e.start)}</div>
-          <div class="val">${formatPrice(e.price)} <small>snt/kWh</small></div>
-        `;
+        
+        // Turvallinen DOM-rakentaminen
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'time';
+        timeDiv.textContent = formatFiTime(e.start);
+        
+        const valDiv = document.createElement('div');
+        valDiv.className = 'val';
+        valDiv.textContent = formatPrice(e.price) + ' ';
+        
+        const smallEl = document.createElement('small');
+        smallEl.textContent = 'snt/kWh';
+        valDiv.appendChild(smallEl);
+        
+        tile.appendChild(timeDiv);
+        tile.appendChild(valDiv);
+        
         tile.addEventListener('click', () => showToast(`${formatFiTime(e.start)} · ${formatPrice(e.price)} snt/kWh`));
         ui.tiles.appendChild(tile);
       }
+      console.log('🔧 DEBUG: Tiles luotu turvallisesti');
 
       drawChart(window);
     }
