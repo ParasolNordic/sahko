@@ -4,13 +4,33 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Pörssisähkö – Spot-hinnat (vartti)</title>
-  <meta name="description" content="Mobiiliystävällinen näkymä Suomen pörssisähkön varttihinnoille (porssisahko.net API)." />
+  <meta name="description" content="Mobiiliystävällinen näkymä Suomen pörssisähkön varttihinnoille." />
+
+  <!-- No robots (meta) -->
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet,noimageindex" />
+  <meta name="googlebot" content="noindex,nofollow,noarchive,nosnippet,noimageindex" />
+  <meta name="bingbot" content="noindex,nofollow,noarchive,nosnippet,noimageindex" />
+
   <meta name="theme-color" content="#0b1220" />
+
+  <!-- No robots (best-effort script, runs ASAP) -->
+  <script>
+    (() => {
+      try {
+        const ua = (navigator.userAgent || "");
+        const bot = /bot|crawler|spider|crawling|HeadlessChrome|Lighthouse|pagespeed|facebookexternalhit|Slackbot|Discordbot|TelegramBot|WhatsApp|Google-Read-Aloud/i;
+        if (bot.test(ua)) {
+          // Keep it empty for bots
+          document.documentElement.innerHTML = "<head><meta name='robots' content='noindex,nofollow'></head><body></body>";
+        }
+      } catch (_) {}
+    })();
+  </script>
+
   <style>
     :root{
       --bg:#0b1220;
       --panel:#0f1a33;
-      --panel2:#0d1730;
       --text:#e8eefc;
       --muted:#aab7da;
       --border:rgba(255,255,255,.08);
@@ -20,13 +40,11 @@
       --bad:#ff5c7a;
       --accent:#7aa7ff;
       --accent2:#9b7dff;
-      --chip:#132246;
       --focus: rgba(122,167,255,.35);
       --radius:18px;
-      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
-
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
@@ -37,49 +55,13 @@
                   var(--bg);
       color:var(--text);
     }
-
-    a{color:inherit}
-
-    .wrap{
-      max-width:1100px;
-      margin:0 auto;
-      padding:18px 14px 34px;
-    }
-
-    header{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      margin:6px 0 14px;
-    }
-    .title{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-    .title h1{
-      font-size:18px;
-      margin:0;
-      letter-spacing:.2px;
-      font-weight:750;
-    }
-    .title p{
-      margin:0;
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.35;
-    }
-
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      align-items:center;
-    }
-
-    button, .seg button{
+    .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 34px;}
+    header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:6px 0 14px;flex-wrap:wrap}
+    .title{display:flex;flex-direction:column;gap:6px;min-width:240px}
+    .title h1{font-size:18px;margin:0;letter-spacing:.2px;font-weight:750}
+    .title p{margin:0;color:var(--muted);font-size:13px;line-height:1.35}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+    button{
       -webkit-tap-highlight-color: transparent;
       border:1px solid var(--border);
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
@@ -93,47 +75,14 @@
     }
     button:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
     button:active{transform:translateY(1px)}
-    button.secondary{
-      background:transparent;
-      box-shadow:none;
-    }
-
-    .seg{
-      display:flex;
-      background: rgba(255,255,255,.03);
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:4px;
-      gap:4px;
-    }
-    .seg button{
-      padding:8px 10px;
-      border-radius:10px;
-      border:0;
-      box-shadow:none;
-      background:transparent;
-      color:var(--muted);
-      font-weight:750;
-    }
-    .seg button[aria-pressed="true"]{
-      background: linear-gradient(180deg, rgba(122,167,255,.25), rgba(122,167,255,.12));
-      color:var(--text);
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:12px;
-    }
-
+    .seg{display:flex;background: rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px;padding:4px;gap:4px}
+    .seg button{padding:8px 10px;border-radius:10px;border:0;box-shadow:none;background:transparent;color:var(--muted);font-weight:750}
+    .seg button[aria-pressed="true"]{background: linear-gradient(180deg, rgba(122,167,255,.25), rgba(122,167,255,.12));color:var(--text)}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
     @media (min-width: 860px){
-      .grid{
-        grid-template-columns: 1.25fr .75fr;
-        gap:14px;
-      }
-      header .title h1{font-size:20px}
+      .grid{grid-template-columns: 1.25fr .75fr;gap:14px}
+      .title h1{font-size:20px}
     }
-
     .card{
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
       border:1px solid var(--border);
@@ -141,320 +90,96 @@
       box-shadow: var(--shadow);
       overflow:hidden;
     }
-    .card .inner{
-      padding:14px;
-    }
-
-    .now{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:10px;
-    }
-    @media (min-width: 520px){
-      .now{
-        grid-template-columns: 1.1fr .9fr;
-        align-items:stretch;
-      }
-    }
-
+    .card .inner{padding:14px}
+    .now{display:grid;grid-template-columns:1fr;gap:10px}
+    @media (min-width: 520px){.now{grid-template-columns: 1.1fr .9fr;align-items:stretch}}
     .big{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      padding:14px;
-      border-radius:16px;
+      display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:16px;
       background: linear-gradient(180deg, rgba(122,167,255,.18), rgba(122,167,255,.06));
       border:1px solid rgba(122,167,255,.25);
     }
-    .big .label{
-      color: var(--muted);
-      font-size:12px;
-      font-weight:700;
-      letter-spacing:.2px;
-    }
-    .big .price{
-      font-size:40px;
-      font-weight:900;
-      letter-spacing:-.6px;
-      line-height:1.05;
-      display:flex;
-      align-items:baseline;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .big .unit{
-      font-size:14px;
-      font-weight:800;
-      color:var(--muted);
-      letter-spacing:.2px;
-    }
+    .big .label{color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.2px}
+    .big .price{font-size:40px;font-weight:900;letter-spacing:-.6px;line-height:1.05;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+    .big .unit{font-size:14px;font-weight:800;color:var(--muted);letter-spacing:.2px}
     .trend{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      border:1px solid var(--border);
-      background: rgba(0,0,0,.18);
-      padding:8px 10px;
-      border-radius:12px;
-      width:max-content;
-      font-weight:800;
-      font-size:12px;
-      color:var(--muted);
+      display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);
+      background: rgba(0,0,0,.18);padding:8px 10px;border-radius:12px;width:max-content;
+      font-weight:800;font-size:12px;color:var(--muted);
     }
     .trend b{color:var(--text)}
-    .trend .dot{
-      width:10px; height:10px; border-radius:999px; background: var(--muted);
-      box-shadow: 0 0 0 4px rgba(255,255,255,.05);
-    }
-
-    .meta{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      padding:14px;
-      border-radius:16px;
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border:1px solid var(--border);
-    }
-    .row{
-      display:flex; justify-content:space-between; align-items:baseline; gap:10px;
-    }
-    .row .k{color:var(--muted); font-size:12px; font-weight:750}
-    .row .v{font-family:var(--mono); font-size:12px; font-weight:750}
-    .pill{
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      padding:7px 10px;
-      border-radius:999px;
-      background: rgba(255,255,255,.04);
-      border:1px solid var(--border);
-      font-size:12px;
-      font-weight:800;
-      color:var(--muted);
-      width:max-content;
-    }
-    .pill .sw{
-      width:10px; height:10px; border-radius:999px; background: var(--accent);
-    }
-
-    .chartHead{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:8px;
-      flex-wrap:wrap;
-    }
-    .chartHead h2{
-      margin:0;
-      font-size:14px;
-      font-weight:850;
-      letter-spacing:.2px;
-    }
-    .chartWrap{
-      padding:12px;
-      border-radius:16px;
-      background: linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.10));
-      border:1px solid var(--border);
-    }
-    .svgBox{
-      width:100%;
-      height:240px;
-    }
-    @media (min-width: 520px){
-      .svgBox{height:300px}
-    }
-
-    .legend{
-      display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;
-      color:var(--muted);
-      font-size:12px;
-      font-weight:750;
-    }
-    .legend .item{display:flex; gap:8px; align-items:center}
-    .legend .line{
-      width:20px; height:2px; background: var(--accent);
-      border-radius:999px;
-    }
-    .legend .mark{
-      width:10px; height:10px; border-radius:999px; background: var(--accent2);
-    }
-
-    .list h2{
-      margin:0 0 10px;
-      font-size:14px;
-      font-weight:850;
-    }
-    .list .cols{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-    }
-    .mini{
-      background: rgba(0,0,0,.18);
-      border:1px solid var(--border);
-      border-radius:16px;
-      padding:12px;
-      overflow:hidden;
-    }
-    .mini h3{
-      margin:0 0 8px;
-      font-size:12px;
-      color:var(--muted);
-      font-weight:900;
-      letter-spacing:.35px;
-      text-transform:uppercase;
-    }
-    .mini ul{
-      margin:0; padding:0; list-style:none;
-      display:flex; flex-direction:column; gap:8px;
-    }
-    .mini li{
-      display:flex; align-items:baseline; justify-content:space-between; gap:10px;
-      padding-bottom:8px;
-      border-bottom:1px dashed rgba(255,255,255,.09);
-    }
-    .mini li:last-child{border-bottom:0; padding-bottom:0}
-    .t{font-family:var(--mono); font-size:12px; color:var(--muted); font-weight:750}
-    .p{font-family:var(--mono); font-size:12px; font-weight:900}
-    .p.good{color:var(--ok)}
-    .p.bad{color:var(--bad)}
-    .p.mid{color:var(--warn)}
-
-    .heat{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .heatHead{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-    .heatHead h2{margin:0; font-size:14px; font-weight:850}
-    .heatHead .hint{color:var(--muted); font-size:12px; font-weight:750}
-    .tiles{
-      display:grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap:8px;
-    }
-    @media (min-width:520px){
-      .tiles{grid-template-columns: repeat(6, 1fr)}
-    }
-    @media (min-width:860px){
-      .tiles{grid-template-columns: repeat(8, 1fr)}
-    }
-    .tile{
-      border-radius:14px;
-      border:1px solid var(--border);
-      padding:10px;
-      background: rgba(0,0,0,.16);
-      min-height:74px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      gap:8px;
-    }
-    .tile .time{
-      font-family:var(--mono);
-      font-size:11px;
-      font-weight:800;
-      color:rgba(232,238,252,.90);
-      letter-spacing:.1px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .tile .val{
-      font-family:var(--mono);
-      font-size:12px;
-      font-weight:950;
-      letter-spacing:.1px;
-      display:flex;
-      align-items:baseline;
-      gap:6px;
-    }
-    .tile .val small{
-      font-size:10px;
-      font-weight:850;
-      color:rgba(232,238,252,.82);
-    }
-    .tile[aria-current="true"]{
-      outline:2px solid rgba(122,167,255,.7);
-      box-shadow: 0 0 0 6px rgba(122,167,255,.15);
-    }
-
-    .foot{
-      margin-top:12px;
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.4;
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      justify-content:space-between;
-      align-items:center;
-    }
-    .status{
-      display:flex; align-items:center; gap:10px;
-      padding:8px 10px;
-      border-radius:12px;
-      border:1px solid var(--border);
-      background: rgba(0,0,0,.16);
-      width:max-content;
-    }
-    .spinner{
-      width:14px; height:14px; border-radius:999px;
-      border:2px solid rgba(255,255,255,.25);
-      border-top-color: rgba(255,255,255,.75);
-      animation: spin 1s linear infinite;
-    }
+    .trend .dot{width:10px;height:10px;border-radius:999px;background: var(--muted);box-shadow: 0 0 0 4px rgba(255,255,255,.05)}
+    .meta{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:16px;background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid var(--border)}
+    .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+    .row .k{color:var(--muted);font-size:12px;font-weight:750}
+    .row .v{font-family:var(--mono);font-size:12px;font-weight:750}
+    .chartWrap{padding:12px;border-radius:16px;background: linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.10));border:1px solid var(--border)}
+    .chartHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;flex-wrap:wrap}
+    .chartHead h2{margin:0;font-size:14px;font-weight:850;letter-spacing:.2px}
+    .status{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;border:1px solid var(--border);background: rgba(0,0,0,.16);width:max-content}
+    .spinner{width:14px;height:14px;border-radius:999px;border:2px solid rgba(255,255,255,.25);border-top-color: rgba(255,255,255,.75);animation: spin 1s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
-
+    .svgBox{width:100%;height:240px}
+    @media (min-width: 520px){.svgBox{height:300px}}
+    .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;color:var(--muted);font-size:12px;font-weight:750}
+    .legend .item{display:flex;gap:8px;align-items:center}
+    .legend .line{width:20px;height:2px;background: var(--accent);border-radius:999px}
+    .legend .mark{width:10px;height:10px;border-radius:999px;background: var(--accent2)}
+    .list h2{margin:0 0 10px;font-size:14px;font-weight:850}
+    .list .cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .mini{background: rgba(0,0,0,.18);border:1px solid var(--border);border-radius:16px;padding:12px;overflow:hidden}
+    .mini h3{margin:0 0 8px;font-size:12px;color:var(--muted);font-weight:900;letter-spacing:.35px;text-transform:uppercase}
+    .mini ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+    .mini li{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-bottom:8px;border-bottom:1px dashed rgba(255,255,255,.09)}
+    .mini li:last-child{border-bottom:0;padding-bottom:0}
+    .t{font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:750}
+    .p{font-family:var(--mono);font-size:12px;font-weight:900}
+    .p.good{color:var(--ok)} .p.bad{color:var(--bad)} .p.mid{color:var(--warn)}
+    .heat{display:flex;flex-direction:column;gap:10px}
+    .heatHead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .heatHead h2{margin:0;font-size:14px;font-weight:850}
+    .heatHead .hint{color:var(--muted);font-size:12px;font-weight:750}
+    .tiles{display:grid;grid-template-columns: repeat(4, 1fr);gap:8px}
+    @media (min-width:520px){.tiles{grid-template-columns: repeat(6, 1fr)}}
+    @media (min-width:860px){.tiles{grid-template-columns: repeat(8, 1fr)}}
+    .tile{
+      border-radius:14px;border:1px solid var(--border);padding:10px;background: rgba(0,0,0,.16);
+      min-height:74px;display:flex;flex-direction:column;justify-content:space-between;gap:8px;
+    }
+    .tile .time{font-family:var(--mono);font-size:11px;font-weight:800;color:rgba(232,238,252,.90);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .tile .val{font-family:var(--mono);font-size:12px;font-weight:950;display:flex;align-items:baseline;gap:6px}
+    .tile .val small{font-size:10px;font-weight:850;color:rgba(232,238,252,.82)}
+    .tile[aria-current="true"]{outline:2px solid rgba(122,167,255,.7);box-shadow: 0 0 0 6px rgba(122,167,255,.15)}
+    .foot{margin-top:12px;color:var(--muted);font-size:12px;line-height:1.4;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center}
     .toast{
-      position:fixed;
-      left:50%;
-      bottom:18px;
-      transform:translateX(-50%);
-      background: rgba(10,18,35,.92);
-      border:1px solid var(--border);
-      box-shadow: var(--shadow);
-      color:var(--text);
-      padding:10px 12px;
-      border-radius:14px;
-      font-size:13px;
-      font-weight:750;
-      display:none;
-      max-width:min(540px, calc(100vw - 28px));
+      position:fixed;left:50%;bottom:18px;transform:translateX(-50%);
+      background: rgba(10,18,35,.92);border:1px solid var(--border);box-shadow: var(--shadow);
+      color:var(--text);padding:10px 12px;border-radius:14px;font-size:13px;font-weight:750;
+      display:none;max-width:min(540px, calc(100vw - 28px));
     }
     .toast.show{display:block}
-
-    .sr-only{
-      position:absolute; width:1px; height:1px; padding:0; margin:-1px;
-      overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
-    }
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <header>
       <div class="title">
         <h1>Pörssisähkö – varttihinnat</h1>
-        <p>
-          Data: porssisahko.net API (sis. alv). Ajat näytetään Suomen ajassa, mutta API palauttaa UTC (Z).
-        </p>
+        <p>Ajat näytetään Suomen ajassa. Data tulee ensisijaisesti <span class="t">/data/latest-prices.json</span> (GitHub Action), varalla suora API.</p>
       </div>
+
       <div class="actions">
+        <div class="seg" role="group" aria-label="Näkymä">
+          <button data-mode="future" aria-pressed="true">Tulevat</button>
+          <button data-mode="past" aria-pressed="false">Menneet</button>
+        </div>
         <div class="seg" role="group" aria-label="Aikaväli">
           <button data-range="6"  aria-pressed="false">6h</button>
           <button data-range="12" aria-pressed="false">12h</button>
           <button data-range="24" aria-pressed="true">24h</button>
           <button data-range="48" aria-pressed="false">48h</button>
         </div>
-        <button id="refreshBtn" title="Päivitä hinnat">Päivitä</button>
+        <button id="refreshBtn" title="Päivitä">Päivitä</button>
       </div>
     </header>
 
@@ -462,8 +187,8 @@
       <section class="card">
         <div class="inner">
           <div class="now">
-            <div class="big" id="nowCard">
-              <div class="label">Nyt</div>
+            <div class="big">
+              <div class="label" id="nowLabel">Seuraava hinta (lähin vartti)</div>
               <div class="price">
                 <span id="nowPrice">—</span>
                 <span class="unit">snt / kWh</span>
@@ -475,6 +200,10 @@
             </div>
 
             <div class="meta">
+              <div class="row">
+                <div class="k">Näkymä</div>
+                <div class="v" id="modeLabel">Tulevat</div>
+              </div>
               <div class="row">
                 <div class="k">Aikaväli</div>
                 <div class="v" id="rangeLabel">24h</div>
@@ -491,10 +220,6 @@
                 <div class="k">Viimeisin päivitys</div>
                 <div class="v" id="updatedAt">—</div>
               </div>
-              <div class="pill" title="Väritys perustuu hintojen kvantiileihin (halpa ↔ kallis).">
-                <span class="sw"></span>
-                <span>Halpa → kallis</span>
-              </div>
             </div>
           </div>
 
@@ -502,31 +227,24 @@
 
           <div class="chartWrap">
             <div class="chartHead">
-              <h2>Hintakäyrä</h2>
+              <h2 id="chartTitle">Tulevat hinnat</h2>
               <div class="status" id="statusBox">
                 <span class="spinner" id="spin" aria-hidden="true"></span>
                 <span id="statusText">Ladataan…</span>
               </div>
             </div>
 
-            <svg class="svgBox" id="chart" viewBox="0 0 1000 320" preserveAspectRatio="none" role="img" aria-label="Sähkön varttihintojen käyrä">
-              <!-- grid + path generated by JS -->
-            </svg>
+            <svg class="svgBox" id="chart" viewBox="0 0 1000 320" preserveAspectRatio="none" role="img" aria-label="Hintakäyrä"></svg>
 
             <div class="legend" aria-hidden="true">
               <div class="item"><span class="line"></span> Hinta</div>
-              <div class="item"><span class="mark"></span> Nyt</div>
+              <div class="item"><span class="mark"></span> Nykyhetki</div>
             </div>
           </div>
 
           <div class="foot">
-            <div>
-              Vinkki: Klikkaa/napauta varttibokseja nähdäksesi tarkan ajan ja hinnan.
-            </div>
-            <div>
-              <span class="t">Endpoint:</span>
-              <span class="t">/v2/latest-prices.json</span>
-            </div>
+            <div>Huom: huomisen hinnat näkyvät yleensä vasta kun ne ovat julkaistu (tyypillisesti iltapäivällä).</div>
+            <div><span class="t">Lähde:</span> <span class="t" id="sourceLabel">—</span></div>
           </div>
         </div>
       </section>
@@ -554,11 +272,6 @@
             </div>
             <div class="tiles" id="tiles" aria-label="Varttikohtaiset hinnat"></div>
           </div>
-
-          <div class="foot" style="margin-top:14px">
-            <div>Cache: <span class="t" id="cacheInfo">—</span></div>
-            <div><span class="t">Aika:</span> <span class="t" id="clock">—</span></div>
-          </div>
         </div>
       </aside>
     </div>
@@ -567,18 +280,20 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
-    const ENDPOINT = 'https://api.porssisahko.net/v2/latest-prices.json';
-    const CACHE_KEY = 'ps_latest_prices_v2';
-    const CACHE_MAX_AGE_MIN = 30; // kevyt välimuisti github pagesille
-    const DEFAULT_RANGE_H = 24;
+    // API docs: v2/latest-prices.json and v2/price.json
+    const API_ENDPOINT = 'https://api.porssisahko.net/v2/latest-prices.json';
+    const LOCAL_ENDPOINT = './data/latest-prices.json'; // generated by GitHub Action
 
     const el = (id) => document.getElementById(id);
 
     const ui = {
+      nowLabel: el('nowLabel'),
       nowPrice: el('nowPrice'),
       trendText: el('trendText'),
       trendDot: el('trendDot'),
+      modeLabel: el('modeLabel'),
       rangeLabel: el('rangeLabel'),
+      chartTitle: el('chartTitle'),
       minVal: el('minVal'),
       maxVal: el('maxVal'),
       avgVal: el('avgVal'),
@@ -589,15 +304,15 @@
       chart: el('chart'),
       statusText: el('statusText'),
       spin: el('spin'),
-      cacheInfo: el('cacheInfo'),
-      clock: el('clock'),
-      toast: el('toast')
+      toast: el('toast'),
+      sourceLabel: el('sourceLabel')
     };
 
     let state = {
-      prices: [],
-      rangeHours: DEFAULT_RANGE_H,
-      lastFetchAt: null
+      all: [],
+      mode: 'future',    // 'future' | 'past'
+      rangeHours: 24,
+      lastUpdated: null
     };
 
     function showToast(msg){
@@ -608,18 +323,13 @@
     }
 
     function formatFiTime(d){
-      // Suomen paikallinen aika, tiivis
       return new Intl.DateTimeFormat('fi-FI', {
         weekday:'short', hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'
       }).format(d);
     }
-    function formatClock(d){
-      return new Intl.DateTimeFormat('fi-FI', {hour:'2-digit', minute:'2-digit', second:'2-digit'}).format(d);
-    }
-    function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
 
     function quantile(sortedArr, q){
-      if(sortedArr.length === 0) return 0;
+      if(!sortedArr.length) return 0;
       const pos = (sortedArr.length - 1) * q;
       const base = Math.floor(pos);
       const rest = pos - base;
@@ -627,20 +337,29 @@
       return sortedArr[base] + rest * (sortedArr[base + 1] - sortedArr[base]);
     }
 
-    function colorForPrice(p, q1, q3, min, max){
-      // kvantiilipohjainen luokittelu: halpa/mid/kallis, mutta myös asteikotus
-      if(p <= q1) return 'rgba(83, 209, 138, .22)';     // ok
-      if(p >= q3) return 'rgba(255, 92, 122, .22)';     // bad
-      // väli: keltainen
-      return 'rgba(255, 209, 102, .18)';
+    function calcStats(entries){
+      const vals = entries.map(x=>x.price);
+      const min = Math.min(...vals);
+      const max = Math.max(...vals);
+      const avg = vals.reduce((a,b)=>a+b,0) / (vals.length || 1);
+      const sorted = [...vals].sort((a,b)=>a-b);
+      const q1 = quantile(sorted, 0.25);
+      const q3 = quantile(sorted, 0.75);
+      return {min, max, avg, q1, q3};
     }
 
-    function strongerBorderForPrice(p, q1, q3){
+    function formatPrice(p){ return (Math.round(p * 100) / 100).toFixed(2); }
+
+    function tileBg(p, q1, q3){
+      if(p <= q1) return 'rgba(83, 209, 138, .22)';
+      if(p >= q3) return 'rgba(255, 92, 122, .22)';
+      return 'rgba(255, 209, 102, .18)';
+    }
+    function tileBorder(p, q1, q3){
       if(p <= q1) return 'rgba(83, 209, 138, .40)';
       if(p >= q3) return 'rgba(255, 92, 122, .40)';
       return 'rgba(255, 209, 102, .30)';
     }
-
     function priceClass(p, q1, q3){
       if(p <= q1) return 'good';
       if(p >= q3) return 'bad';
@@ -653,340 +372,268 @@
     }
 
     function parsePrices(raw){
-      // raw.prices: {price, startDate, endDate}
       const arr = (raw && raw.prices) ? raw.prices : [];
-      return arr
-        .map(x => ({
+      return arr.map(x => ({
           price: Number(x.price),
           start: new Date(x.startDate),
           end: new Date(x.endDate),
           startIso: x.startDate,
           endIso: x.endDate
-        }))
-        .filter(x => Number.isFinite(x.price) && !isNaN(x.start));
+      })).filter(x => Number.isFinite(x.price) && !isNaN(x.start));
     }
 
-    function getNowEntry(prices){
+    function nearestQuarterFromNow(entries){
       const now = new Date();
-      return prices.find(e => e.start <= now && e.end > now) || null;
+      // "future": first entry with end > now (so current or next). We prefer next start >= now, but allow "current" as nearest.
+      const futureStarts = entries.filter(e => e.start >= now).sort((a,b)=>a.start-b.start);
+      if(futureStarts.length) return futureStarts[0];
+      // fallback: current
+      const current = entries.find(e => e.start <= now && e.end > now);
+      return current || null;
     }
 
-    function sliceByRange(prices, rangeHours){
+    function sliceWindow(entries, mode, rangeHours){
       const now = new Date();
-      const from = new Date(now.getTime() - rangeHours * 60 * 60 * 1000);
-      // näytetään vain valitun ikkunan sisällä olevat startit
-      return prices.filter(e => e.start >= from && e.start <= now.getTime() + rangeHours * 60 * 60 * 1000)
-                   .filter(e => e.start >= from);
+      const ms = rangeHours * 3600 * 1000;
+
+      if(mode === 'future'){
+        const to = new Date(now.getTime() + ms);
+        return entries.filter(e => e.start >= now && e.start <= to).sort((a,b)=>a.start-b.start);
+      } else {
+        const from = new Date(now.getTime() - ms);
+        return entries.filter(e => e.start >= from && e.start <= now).sort((a,b)=>a.start-b.start);
+      }
     }
 
-    function calcStats(prices){
-      const vals = prices.map(x=>x.price);
-      const min = Math.min(...vals);
-      const max = Math.max(...vals);
-      const avg = vals.reduce((a,b)=>a+b,0) / (vals.length || 1);
-      const sorted = [...vals].sort((a,b)=>a-b);
-      const q1 = quantile(sorted, 0.25);
-      const q3 = quantile(sorted, 0.75);
-      return {min, max, avg, q1, q3};
-    }
+    function drawChart(entries){
+      const W=1000,H=320,padL=54,padR=18,padT=18,padB=46;
+      const w=W-padL-padR,h=H-padT-padB;
 
-    function formatPrice(p){
-      // 2 desimaalia, mutta siisti
-      return (Math.round(p * 100) / 100).toFixed(2);
-    }
-
-    function updateNowCard(prices, stats){
-      const nowEntry = getNowEntry(prices);
-      if(!nowEntry){
-        ui.nowPrice.textContent = '—';
-        ui.trendText.textContent = 'Nyt-hintaa ei löytynyt (datassa aukko?)';
-        ui.trendDot.style.background = 'rgba(255,255,255,.35)';
+      if(entries.length < 2){
+        ui.chart.innerHTML = `
+          <text x="50%" y="50%" fill="rgba(255,255,255,.60)" font-size="14" text-anchor="middle">
+            Ei riittävästi dataa tähän näkymään.
+          </text>`;
         return;
       }
 
-      ui.nowPrice.textContent = formatPrice(nowEntry.price);
+      const vals = entries.map(e=>e.price);
+      const min = Math.min(...vals);
+      const max = Math.max(...vals);
+      const span = (max-min) || 1;
 
-      // trendi: vertaa edelliseen varttiin jos löytyy
-      const idx = prices.indexOf(nowEntry);
-      const prev = idx > 0 ? prices[idx-1] : null;
-      let trend = '—';
-      let dot = 'rgba(255,255,255,.35)';
-      if(prev){
-        const diff = nowEntry.price - prev.price;
-        const pct = prev.price !== 0 ? (diff / prev.price) * 100 : 0;
-        if(diff > 0.0001){
-          trend = `Nousee: +${formatPrice(diff)} snt (${pct.toFixed(1)}%)`;
-          dot = 'var(--bad)';
-        } else if(diff < -0.0001){
-          trend = `Laskee: ${formatPrice(diff)} snt (${pct.toFixed(1)}%)`;
-          dot = 'var(--ok)';
-        } else {
-          trend = 'Tasainen';
-          dot = 'var(--warn)';
-        }
-      } else {
-        trend = 'Ei vertailukohtaa';
-        dot = 'var(--warn)';
+      const x = (i)=> padL + (i/(entries.length-1))*w;
+      const y = (v)=> padT + (1-(v-min)/span)*h;
+
+      // Grid
+      const grid=[];
+      const stepsY=4;
+      for(let i=0;i<=stepsY;i++){
+        const yy=padT+(i/stepsY)*h;
+        grid.push(`<line x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}" stroke="rgba(255,255,255,.07)" stroke-width="1" />`);
       }
-      ui.trendText.innerHTML = `<b>${formatFiTime(nowEntry.start)}</b> · ${trend}`;
-      ui.trendDot.style.background = dot;
+      const stepsX=6;
+      for(let i=0;i<=stepsX;i++){
+        const xx=padL+(i/stepsX)*w;
+        grid.push(`<line x1="${xx}" y1="${padT}" x2="${xx}" y2="${H-padB}" stroke="rgba(255,255,255,.06)" stroke-width="1" />`);
+      }
 
+      // Path
+      let d='';
+      entries.forEach((e,i)=>{
+        const xx=x(i), yy=y(e.price);
+        d += (i===0 ? `M ${xx} ${yy}` : ` L ${xx} ${yy}`);
+      });
+
+      // "now" marker line (current time position within window, not tied to a data point)
+      const now = new Date();
+      const startT = entries[0].start.getTime();
+      const endT = entries[entries.length-1].start.getTime();
+      let nowMarkup = '';
+      if(now.getTime() >= startT && now.getTime() <= endT){
+        const t = (now.getTime()-startT)/(endT-startT || 1);
+        const nx = padL + t*w;
+        nowMarkup = `<line x1="${nx}" y1="${padT}" x2="${nx}" y2="${H-padB}" stroke="rgba(155,125,255,.35)" stroke-width="2" />`;
+      }
+
+      const startLbl = formatFiTime(entries[0].start);
+      const endLbl = formatFiTime(entries[entries.length-1].start);
+
+      ui.chart.innerHTML = `
+        <rect x="0" y="0" width="${W}" height="${H}" fill="transparent" />
+        ${grid.join('')}
+        <path d="${d}" fill="none" stroke="rgba(122,167,255,.95)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        ${nowMarkup}
+        <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(255,255,255,.10)" stroke-width="1.5" />
+        <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(255,255,255,.10)" stroke-width="1.5" />
+        <text x="${padL}" y="${H-18}" fill="rgba(255,255,255,.55)" font-size="12" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${startLbl}</text>
+        <text x="${W-padR}" y="${H-18}" fill="rgba(255,255,255,.55)" font-size="12" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${endLbl}</text>
+        <text x="${padL-10}" y="${y(max)+4}" fill="rgba(255,255,255,.55)" font-size="12" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${formatPrice(max)}</text>
+        <text x="${padL-10}" y="${y(min)+4}" fill="rgba(255,255,255,.55)" font-size="12" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${formatPrice(min)}</text>
+      `;
+    }
+
+    function render(){
+      if(!state.all.length) return;
+
+      const window = sliceWindow(state.all, state.mode, state.rangeHours);
+      ui.modeLabel.textContent = state.mode === 'future' ? 'Tulevat' : 'Menneet';
+      ui.chartTitle.textContent = state.mode === 'future' ? 'Tulevat hinnat' : 'Menneet hinnat';
+      ui.rangeLabel.textContent = `${state.rangeHours}h`;
+
+      if(!window.length){
+        ui.nowLabel.textContent = state.mode === 'future' ? 'Seuraava hinta' : 'Hinta viime vartilta';
+        ui.nowPrice.textContent = '—';
+        ui.trendText.textContent = state.mode === 'future'
+          ? 'Tulevia hintoja ei ole saatavilla tässä datassa (huomisen hinnat eivät ehkä vielä ole julkaistu).'
+          : 'Menneitä hintoja ei löytynyt tälle ikkunalle.';
+        ui.trendDot.style.background = 'rgba(255,255,255,.35)';
+        ui.minVal.textContent = ui.maxVal.textContent = ui.avgVal.textContent = '—';
+        ui.tiles.innerHTML = '';
+        ui.cheapList.innerHTML = '';
+        ui.expList.innerHTML = '';
+        drawChart(window);
+        return;
+      }
+
+      const stats = calcStats(window);
       ui.minVal.textContent = formatPrice(stats.min);
       ui.maxVal.textContent = formatPrice(stats.max);
       ui.avgVal.textContent = formatPrice(stats.avg);
-    }
 
-    function updateLists(prices, stats){
-      const sorted = [...prices].sort((a,b)=>a.price-b.price);
+      // Card main value
+      if(state.mode === 'future'){
+        const next = nearestQuarterFromNow(state.all);
+        if(next){
+          ui.nowLabel.textContent = 'Seuraava hinta (lähin vartti)';
+          ui.nowPrice.textContent = formatPrice(next.price);
+          ui.trendText.innerHTML = `<b>${formatFiTime(next.start)}</b> · alkaa`;
+          ui.trendDot.style.background = 'var(--accent2)';
+        } else {
+          ui.nowLabel.textContent = 'Seuraava hinta';
+          ui.nowPrice.textContent = '—';
+          ui.trendText.textContent = 'Seuraavaa varttia ei löytynyt datasta.';
+          ui.trendDot.style.background = 'rgba(255,255,255,.35)';
+        }
+      } else {
+        const last = window[window.length-1];
+        ui.nowLabel.textContent = 'Hinta (viimeisin vartti ikkunassa)';
+        ui.nowPrice.textContent = formatPrice(last.price);
+        ui.trendText.innerHTML = `<b>${formatFiTime(last.start)}</b> · päättyy ${formatFiTime(last.end)}`;
+        ui.trendDot.style.background = 'var(--accent)';
+      }
+
+      // Top lists
+      const sorted = [...window].sort((a,b)=>a.price-b.price);
       const cheapest = sorted.slice(0, 8);
       const expensive = sorted.slice(-8).reverse();
-
       const liHtml = (e, cls) => `
         <li>
           <span class="t">${formatFiTime(e.start)}</span>
           <span class="p ${cls}">${formatPrice(e.price)}</span>
-        </li>
-      `;
-
+        </li>`;
       ui.cheapList.innerHTML = cheapest.map(e => liHtml(e, priceClass(e.price, stats.q1, stats.q3))).join('');
       ui.expList.innerHTML = expensive.map(e => liHtml(e, priceClass(e.price, stats.q1, stats.q3))).join('');
-    }
 
-    function updateTiles(prices, stats){
-      const nowEntry = getNowEntry(prices);
+      // Tiles
       ui.tiles.innerHTML = '';
-
-      for(const e of prices){
+      for(const e of window){
         const tile = document.createElement('button');
         tile.type = 'button';
         tile.className = 'tile';
-        tile.style.background = colorForPrice(e.price, stats.q1, stats.q3, stats.min, stats.max);
-        tile.style.borderColor = strongerBorderForPrice(e.price, stats.q1, stats.q3);
+        tile.style.background = tileBg(e.price, stats.q1, stats.q3);
+        tile.style.borderColor = tileBorder(e.price, stats.q1, stats.q3);
         tile.setAttribute('aria-label', `${formatFiTime(e.start)}: ${formatPrice(e.price)} snt / kWh`);
         tile.innerHTML = `
           <div class="time">${formatFiTime(e.start)}</div>
           <div class="val">${formatPrice(e.price)} <small>snt/kWh</small></div>
         `;
-        if(nowEntry && e.startIso === nowEntry.startIso) tile.setAttribute('aria-current','true');
-
-        tile.addEventListener('click', () => {
-          showToast(`${formatFiTime(e.start)} · ${formatPrice(e.price)} snt/kWh`);
-        });
-
+        tile.addEventListener('click', () => showToast(`${formatFiTime(e.start)} · ${formatPrice(e.price)} snt/kWh`));
         ui.tiles.appendChild(tile);
       }
+
+      drawChart(window);
     }
 
-    function drawChart(prices, stats){
-      // Responsiivinen SVG viewBox 1000x320. Piirretään grid, akselit, polku, ja "nyt"-piste.
-      const W = 1000, H = 320;
-      const padL = 54, padR = 18, padT = 18, padB = 46;
-      const w = W - padL - padR;
-      const h = H - padT - padB;
-
-      const vals = prices.map(p=>p.price);
-      const min = Math.min(...vals);
-      const max = Math.max(...vals);
-      const span = (max - min) || 1;
-
-      const x = (i) => padL + (i/(prices.length-1 || 1))*w;
-      const y = (v) => padT + (1 - (v - min)/span)*h;
-
-      const nowEntry = getNowEntry(state.prices); // koko datasetistä
-      const nowIdx = nowEntry ? prices.findIndex(e => e.startIso === nowEntry.startIso) : -1;
-
-      // grid
-      const gridLines = [];
-      const stepsY = 4;
-      for(let i=0;i<=stepsY;i++){
-        const yy = padT + (i/stepsY)*h;
-        gridLines.push(`<line x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}" stroke="rgba(255,255,255,.07)" stroke-width="1" />`);
-      }
-      const stepsX = Math.min(6, Math.max(2, Math.floor(prices.length/24)));
-      for(let i=0;i<=stepsX;i++){
-        const xx = padL + (i/stepsX)*w;
-        gridLines.push(`<line x1="${xx}" y1="${padT}" x2="${xx}" y2="${H-padB}" stroke="rgba(255,255,255,.06)" stroke-width="1" />`);
-      }
-
-      // path
-      let d = '';
-      prices.forEach((p,i)=>{
-        const xx = x(i);
-        const yy = y(p.price);
-        d += (i===0 ? `M ${xx} ${yy}` : ` L ${xx} ${yy}`);
-      });
-
-      // labels (min/max)
-      const fmt = (n)=>formatPrice(n);
-      const minY = y(min), maxY = y(max);
-
-      // x labels: aloitus & loppu
-      const startLbl = formatFiTime(prices[0].start);
-      const endLbl = formatFiTime(prices[prices.length-1].start);
-
-      // now marker
-      let nowMarkup = '';
-      if(nowIdx >= 0){
-        const nx = x(nowIdx);
-        const ny = y(prices[nowIdx].price);
-        nowMarkup = `
-          <line x1="${nx}" y1="${padT}" x2="${nx}" y2="${H-padB}" stroke="rgba(155,125,255,.35)" stroke-width="2" />
-          <circle cx="${nx}" cy="${ny}" r="7" fill="rgba(155,125,255,.95)" />
-          <circle cx="${nx}" cy="${ny}" r="16" fill="rgba(155,125,255,.12)" />
-        `;
-      }
-
-      ui.chart.innerHTML = `
-        <rect x="0" y="0" width="${W}" height="${H}" fill="transparent" />
-        ${gridLines.join('')}
-
-        <path d="${d}" fill="none" stroke="rgba(122,167,255,.95)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        ${nowMarkup}
-
-        <!-- axis labels -->
-        <text x="${padL}" y="${H-18}" fill="rgba(255,255,255,.55)" font-size="12" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace">${startLbl}</text>
-        <text x="${W-padR}" y="${H-18}" fill="rgba(255,255,255,.55)" font-size="12" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace">${endLbl}</text>
-
-        <text x="${padL-10}" y="${maxY+4}" fill="rgba(255,255,255,.55)" font-size="12" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace">${fmt(max)}</text>
-        <text x="${padL-10}" y="${minY+4}" fill="rgba(255,255,255,.55)" font-size="12" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace">${fmt(min)}</text>
-
-        <!-- axis -->
-        <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(255,255,255,.10)" stroke-width="1.5" />
-        <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(255,255,255,.10)" stroke-width="1.5" />
-      `;
+    async function fetchJson(url){
+      const res = await fetch(url, { cache: 'no-store' });
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
     }
 
-    function updateRangeButtons(rangeH){
-      document.querySelectorAll('.seg button').forEach(btn=>{
-        const isOn = Number(btn.dataset.range) === Number(rangeH);
-        btn.setAttribute('aria-pressed', isOn ? 'true' : 'false');
-      });
-      ui.rangeLabel.textContent = `${rangeH}h`;
-    }
+    async function loadData(force){
+      setLoading(true, 'Haetaan…');
 
-    function writeCache(prices){
-      const payload = {
-        savedAt: new Date().toISOString(),
-        prices: prices.map(p => ({
-          price: p.price,
-          startDate: p.startIso,
-          endDate: p.endIso
-        }))
-      };
-      localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
-      ui.cacheInfo.textContent = `localStorage (${payload.savedAt})`;
-    }
-
-    function readCache(){
+      // 1) Prefer local file (works on GitHub Pages always)
       try{
-        const raw = localStorage.getItem(CACHE_KEY);
-        if(!raw) return null;
-        const obj = JSON.parse(raw);
-        if(!obj || !obj.savedAt || !obj.prices) return null;
-        const ageMin = (Date.now() - new Date(obj.savedAt).getTime()) / 60000;
-        return { obj, ageMin };
-      }catch{
-        return null;
-      }
-    }
-
-    async function fetchLatest(force=false){
-      const cache = readCache();
-      if(!force && cache && cache.ageMin <= CACHE_MAX_AGE_MIN){
-        const parsed = parsePrices({prices: cache.obj.prices});
+        const local = await fetchJson(LOCAL_ENDPOINT + (force ? `?t=${Date.now()}` : ''));
+        const parsed = parsePrices(local);
         if(parsed.length){
-          state.prices = parsed;
-          state.lastFetchAt = new Date(cache.obj.savedAt);
-          ui.updatedAt.textContent = formatFiTime(state.lastFetchAt);
-          setLoading(false, 'Välimuistista');
+          state.all = parsed.sort((a,b)=>a.start-b.start);
+          state.lastUpdated = new Date(local.generatedAt || Date.now());
+          ui.updatedAt.textContent = formatFiTime(state.lastUpdated);
+          ui.sourceLabel.textContent = 'local (/data/latest-prices.json)';
+          setLoading(false, 'Valmis');
           render();
           return;
         }
+      } catch (_) {
+        // ignore and try API
       }
 
-      setLoading(true, 'Haetaan API:sta…');
-
+      // 2) Try direct API (may fail due to CORS in browser)
       try{
-        const res = await fetch(ENDPOINT, { cache: 'no-store' });
-        if(!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
-        const parsed = parsePrices(json);
-        if(!parsed.length) throw new Error('Tyhjä vastaus');
-        state.prices = parsed;
-        state.lastFetchAt = new Date();
-        ui.updatedAt.textContent = formatFiTime(state.lastFetchAt);
-        writeCache(parsed);
-        setLoading(false, 'Päivitetty');
-        showToast('Hinnat päivitetty');
+        const api = await fetchJson(API_ENDPOINT);
+        const parsed = parsePrices(api);
+        if(!parsed.length) throw new Error('Tyhjä data');
+        state.all = parsed.sort((a,b)=>a.start-b.start);
+        state.lastUpdated = new Date();
+        ui.updatedAt.textContent = formatFiTime(state.lastUpdated);
+        ui.sourceLabel.textContent = 'API (direct)';
+        setLoading(false, 'Valmis');
         render();
-      }catch(err){
+        return;
+      } catch (err){
         setLoading(false, 'Virhe');
-        const msg = `Haku epäonnistui: ${err?.message || err}`;
-        showToast(msg);
-        ui.cacheInfo.textContent = cache ? `cache käytössä (ikä ${cache.ageMin.toFixed(0)} min)` : 'ei cachea';
-        // jos cache löytyy, yritä renderöidä siitä
-        if(cache){
-          const parsed = parsePrices({prices: cache.obj.prices});
-          if(parsed.length){
-            state.prices = parsed;
-            state.lastFetchAt = new Date(cache.obj.savedAt);
-            ui.updatedAt.textContent = formatFiTime(state.lastFetchAt);
-            render();
-          }
-        }
+        ui.sourceLabel.textContent = '—';
+        showToast(`Datan haku epäonnistui (todennäköisesti CORS). Ota GitHub Action käyttöön. (${err.message || err})`);
       }
     }
 
-    function render(){
-      if(!state.prices.length) return;
-
-      // valitaan aikaväli: viimeiset N tuntia datasta, mutta myös "nyt" ympärillä voi olla tulevaisuutta
-      // tässä näytetään yksinkertaisesti viimeiset rangeHours tuntia tähän hetkeen asti (historian puolelta)
-      const now = new Date();
-      const from = new Date(now.getTime() - state.rangeHours*3600*1000);
-      const window = state.prices.filter(e => e.start >= from && e.start <= now);
-
-      // jos ikkunaan ei osu mitään (esim. koneen kello outo), fallback: ota viimeiset X*4 varttia
-      const fallbackCount = state.rangeHours*4;
-      const slice = window.length ? window : state.prices.slice(-fallbackCount);
-
-      const stats = calcStats(slice);
-
-      updateNowCard(state.prices, stats); // nyt lasketaan koko datasta
-      updateLists(slice, stats);
-      updateTiles(slice, stats);
-      drawChart(slice, stats);
-
-      ui.cacheInfo.textContent = ui.cacheInfo.textContent.startsWith('localStorage') ? ui.cacheInfo.textContent : '—';
+    function setLoading(isLoading, text){
+      ui.statusText.textContent = text || (isLoading ? 'Ladataan…' : 'Valmis');
+      ui.spin.style.display = isLoading ? 'inline-block' : 'none';
     }
 
-    function tickClock(){
-      ui.clock.textContent = formatClock(new Date());
-    }
-
-    // Range buttons
-    document.querySelectorAll('.seg button').forEach(btn=>{
+    // Buttons: mode
+    document.querySelectorAll('[data-mode]').forEach(btn=>{
       btn.addEventListener('click', ()=>{
-        state.rangeHours = Number(btn.dataset.range);
-        updateRangeButtons(state.rangeHours);
+        const m = btn.dataset.mode;
+        state.mode = m;
+        document.querySelectorAll('[data-mode]').forEach(b=>{
+          b.setAttribute('aria-pressed', b.dataset.mode === m ? 'true' : 'false');
+        });
         render();
       });
     });
 
-    // refresh
-    el('refreshBtn').addEventListener('click', ()=>fetchLatest(true));
+    // Buttons: range
+    document.querySelectorAll('[data-range]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const r = Number(btn.dataset.range);
+        state.rangeHours = r;
+        document.querySelectorAll('[data-range]').forEach(b=>{
+          b.setAttribute('aria-pressed', Number(b.dataset.range) === r ? 'true' : 'false');
+        });
+        render();
+      });
+    });
 
-    // start
-    updateRangeButtons(state.rangeHours);
-    tickClock();
-    setInterval(tickClock, 1000);
+    // Refresh
+    el('refreshBtn').addEventListener('click', ()=>loadData(true));
 
-    // Auto refresh: 10 min välein (kevyt)
-    setInterval(()=>fetchLatest(false), 10*60*1000);
-
-    // initial
-    fetchLatest(false);
+    // Init
+    loadData(false);
   </script>
 </body>
 </html>
-
