@@ -1,0 +1,32 @@
+name: Update electricity prices JSON
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch latest prices
+        run: |
+          mkdir -p data
+          curl -fsSL "https://api.porssisahko.net/v2/latest-prices.json" -o data/latest-prices.raw.json
+          node -e "const fs=require('fs'); const raw=JSON.parse(fs.readFileSync('data/latest-prices.raw.json','utf8')); raw.generatedAt=new Date().toISOString(); fs.writeFileSync('data/latest-prices.json', JSON.stringify(raw,null,2));"
+          rm -f data/latest-prices.raw.json
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/latest-prices.json
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "Update latest prices"
+          git push
