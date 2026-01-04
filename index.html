@@ -261,11 +261,7 @@
             </div>
 
             <svg class="svgBox" id="chart" viewBox="0 0 1000 320" preserveAspectRatio="none" role="img" aria-label="Hintakäyrä"></svg>
-            <div id="chartTooltip" style="display:none;position:absolute;background:rgba(10,18,35,.95);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:12px;pointer-events:none;z-index:100;backdrop-filter:blur(10px);box-shadow:0 4px 12px rgba(0,0,0,.3)"></div>
-
-            <div class="legend" aria-hidden="true">
-              <div class="item"><span class="line"></span> Hinta</div>
-            </div>
+            <div id="chartTooltip" style="display:none;position:fixed;background:rgba(10,18,35,.97);border:1px solid rgba(122,167,255,.4);border-radius:12px;padding:12px 16px;font-size:14px;pointer-events:none;z-index:1000;backdrop-filter:blur(12px);box-shadow:0 6px 20px rgba(0,0,0,.5);min-width:160px"></div>
           </div>
 
           <div class="foot">
@@ -574,10 +570,10 @@
         ${nowMarkup}
         <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(255,255,255,.10)" stroke-width="1.5" />
         <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(255,255,255,.10)" stroke-width="1.5" />
-        <text x="${padL}" y="${H-18}" fill="rgba(255,255,255,.65)" font-size="13" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${startLbl}</text>
-        <text x="${W-padR}" y="${H-18}" fill="rgba(255,255,255,.65)" font-size="13" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${endLbl}</text>
-        <text x="${padL-10}" y="${y(max)+5}" fill="rgba(255,255,255,.80)" font-size="14" font-weight="700" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${formatPrice(max)}</text>
-        <text x="${padL-10}" y="${y(min)+5}" fill="rgba(255,255,255,.80)" font-size="14" font-weight="700" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${formatPrice(min)}</text>
+        <text x="${padL}" y="${H-18}" fill="rgba(255,255,255,.80)" font-size="15" font-weight="600" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${startLbl}</text>
+        <text x="${W-padR}" y="${H-18}" fill="rgba(255,255,255,.80)" font-size="15" font-weight="600" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${endLbl}</text>
+        <text x="${padL-10}" y="${y(max)+5}" fill="rgba(255,255,255,.90)" font-size="16" font-weight="800" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${formatPrice(max)}</text>
+        <text x="${padL-10}" y="${y(min)+5}" fill="rgba(255,255,255,.90)" font-size="16" font-weight="800" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${formatPrice(min)}</text>
       `;
       
       // Lisätään interaktiivisuus - tooltip näyttää hinnan koskettaessa/hoverissa
@@ -600,12 +596,37 @@
         
         const point = entries[dataIndex];
         ui.chartTooltip.innerHTML = `
-          <div style="font-weight:800;color:var(--accent);margin-bottom:4px">${formatPrice(point.price)} snt/kWh</div>
-          <div style="font-size:11px;color:var(--muted)">${formatFiTime(point.start)}</div>
+          <div style="font-weight:800;color:var(--accent);margin-bottom:6px;font-size:16px">${formatPrice(point.price)} snt/kWh</div>
+          <div style="font-size:13px;color:var(--muted)">${formatFiTime(point.start)}</div>
         `;
         ui.chartTooltip.style.display = 'block';
-        ui.chartTooltip.style.left = `${clientX + 10}px`;
-        ui.chartTooltip.style.top = `${clientY - 60}px`;
+        
+        // Laske tooltip-koko ja varmista että pysyy ruudulla
+        const tooltipRect = ui.chartTooltip.getBoundingClientRect();
+        const tooltipWidth = tooltipRect.width || 150;
+        const tooltipHeight = tooltipRect.height || 60;
+        
+        // Sijoita tooltip lähemmäksi sormea - vasemmalle puolelle jos mahtuu, muuten oikealle
+        let left = clientX - tooltipWidth - 15;
+        if(left < 10) {
+          left = clientX + 15;
+        }
+        
+        // Varmista että tooltip ei mene oikean reunan yli
+        const maxLeft = window.innerWidth - tooltipWidth - 10;
+        if(left > maxLeft) {
+          left = maxLeft;
+        }
+        
+        // Sijoita tooltip hieman kosketuspaikan yläpuolelle
+        let top = clientY - tooltipHeight - 15;
+        if(top < 10) {
+          top = clientY + 20; // Jos ei mahdu yläpuolelle, laita alapuolelle
+        }
+        
+        ui.chartTooltip.style.left = `${left}px`;
+        ui.chartTooltip.style.top = `${top}px`;
+        ui.chartTooltip.style.zIndex = '1000';
       };
       
       ui.chart.addEventListener('mousemove', (e) => showTooltipForPoint(e.clientX, e.clientY));
