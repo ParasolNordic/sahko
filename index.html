@@ -57,10 +57,10 @@
     }
     .wrap{max-width:1100px;margin:0 auto;padding:18px 14px 34px;}
     header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:6px 0 14px;flex-wrap:wrap}
-    .title{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1 1 240px}
+    .title{display:flex;flex-direction:column;gap:6px;min-width:240px}
     .title h1{font-size:18px;margin:0;letter-spacing:.2px;font-weight:750}
     .title p{margin:0;color:var(--muted);font-size:13px;line-height:1.35}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-items:center;min-width:0}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
     button{
       -webkit-tap-highlight-color: transparent;
       border:1px solid var(--border);
@@ -72,15 +72,13 @@
       font-size:13px;
       cursor:pointer;
       box-shadow: 0 6px 18px rgba(0,0,0,.22);
-      white-space:nowrap;
-      min-width:0;
     }
     button:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
     button:active{transform:translateY(1px)}
-    .seg{display:flex;background: rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px;padding:4px;gap:4px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
-    .seg button{padding:8px 10px;border-radius:10px;border:0;box-shadow:none;background:transparent;color:var(--muted);font-weight:750;white-space:nowrap;flex-shrink:0}
+    .seg{display:flex;background: rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px;padding:4px;gap:4px}
+    .seg button{padding:8px 10px;border-radius:10px;border:0;box-shadow:none;background:transparent;color:var(--muted);font-weight:750}
     .seg button[aria-pressed="true"]{background: linear-gradient(180deg, rgba(122,167,255,.25), rgba(122,167,255,.12));color:var(--text)}
-    .grid{display:grid;grid-template-columns:1fr;gap:12px;width:100%;min-width:0}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
     @media (min-width: 860px){
       .grid{grid-template-columns: 1.25fr .75fr;gap:14px}
       .title h1{font-size:20px}
@@ -91,10 +89,8 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
-      width:100%;
-      min-width:0;
     }
-    .card .inner{padding:14px;width:100%;min-width:0}
+    .card .inner{padding:14px}
     .now{display:grid;grid-template-columns:1fr;gap:10px}
     @media (min-width: 520px){.now{grid-template-columns: 1.1fr .9fr;align-items:stretch}}
     .big{
@@ -138,16 +134,17 @@
     .t{font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:750}
     .p{font-family:var(--mono);font-size:12px;font-weight:900}
     .p.good{color:var(--ok)} .p.bad{color:var(--bad)} .p.mid{color:var(--warn)}
-    .heat{display:flex;flex-direction:column;gap:10px;width:100%;min-width:0}
+    .heat{display:flex;flex-direction:column;gap:10px}
     .heatHead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     .heatHead h2{margin:0;font-size:14px;font-weight:850}
     .heatHead .hint{color:var(--muted);font-size:12px;font-weight:750}
-    .tiles{display:grid;grid-template-columns: repeat(4, 1fr);gap:8px;width:100%;min-width:0}
+    .tiles{display:grid;grid-template-columns: repeat(4, 1fr);gap:8px}
     @media (min-width:520px){.tiles{grid-template-columns: repeat(6, 1fr)}}
     @media (min-width:860px){.tiles{grid-template-columns: repeat(8, 1fr)}}
     .tile{
       border-radius:14px;border:1px solid var(--border);padding:10px;background: rgba(0,0,0,.16);
-      min-height:74px;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:8px;
+      min-height:74px;display:flex;flex-direction:column;justify-content:space-between;gap:8px;
+      min-width:0;
     }
     .tile .time{font-family:var(--mono);font-size:11px;font-weight:800;color:rgba(232,238,252,.90);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
     .tile .val{font-family:var(--mono);font-size:12px;font-weight:950;display:flex;align-items:baseline;gap:6px;min-width:0;flex-wrap:wrap}
@@ -178,7 +175,7 @@
           <button data-mode="past" aria-pressed="false">Menneet</button>
         </div>
         <div class="seg" role="group" aria-label="Aikaväli">
-          <button data-range="1"  aria-pressed="false">1h</button>
+          <button data-range="6"  aria-pressed="false">6h</button>
           <button data-range="12" aria-pressed="false">12h</button>
           <button data-range="24" aria-pressed="true">24h</button>
           <button data-range="48" aria-pressed="false">48h</button>
@@ -271,10 +268,10 @@
 
           <div class="heat">
             <div class="heatHead">
-              <h2>Varttiruudukko</h2>
+              <h2>Tuntiruudukko</h2>
               <div class="hint">Väri = suhteellinen hinta</div>
             </div>
-            <div class="tiles" id="tiles" aria-label="Varttikohtaiset hinnat"></div>
+            <div class="tiles" id="tiles" aria-label="Tuntikohtaiset hinnat"></div>
           </div>
         </div>
       </aside>
@@ -284,12 +281,9 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
-    console.log('🔧 DEBUG: Sovellus käynnistyy');
-    console.log('🔧 DEBUG: Viewport width:', window.innerWidth);
-    console.log('🔧 DEBUG: Viewport height:', window.innerHeight);
-    
+    console.log('🔧 DEBUG: Käynnistys - width:', window.innerWidth, 'height:', window.innerHeight);
     window.addEventListener('resize', () => {
-      console.log('🔧 DEBUG: Resize event - width:', window.innerWidth, 'height:', window.innerHeight);
+      console.log('🔧 DEBUG: Resize - width:', window.innerWidth);
     });
 
     // API docs: v2/latest-prices.json and v2/price.json
@@ -394,6 +388,39 @@
       })).filter(x => Number.isFinite(x.price) && !isNaN(x.start));
     }
 
+    function aggregateToHours(quarters){
+      console.log('🔧 DEBUG: Aggregoidaan', quarters.length, 'varttia tunneiksi');
+      const hourMap = new Map();
+      
+      for(const q of quarters){
+        const hourKey = new Date(q.start.getFullYear(), q.start.getMonth(), q.start.getDate(), q.start.getHours()).toISOString();
+        
+        if(!hourMap.has(hourKey)){
+          hourMap.set(hourKey, {
+            start: new Date(q.start.getFullYear(), q.start.getMonth(), q.start.getDate(), q.start.getHours()),
+            prices: []
+          });
+        }
+        hourMap.get(hourKey).prices.push(q.price);
+      }
+      
+      const hours = [];
+      for(const [key, data] of hourMap.entries()){
+        const avgPrice = data.prices.reduce((a,b)=>a+b,0) / data.prices.length;
+        const endTime = new Date(data.start.getTime() + 3600000);
+        hours.push({
+          price: avgPrice,
+          start: data.start,
+          end: endTime,
+          startIso: data.start.toISOString(),
+          endIso: endTime.toISOString()
+        });
+      }
+      
+      console.log('🔧 DEBUG: Aggregoitu', hours.length, 'tuntia');
+      return hours.sort((a,b)=>a.start-b.start);
+    }
+
     function nearestQuarterFromNow(entries){
       const now = new Date();
       // "future": first entry with end > now (so current or next). We prefer next start >= now, but allow "current" as nearest.
@@ -486,15 +513,9 @@
     }
 
     function render(){
-      console.log('🔧 DEBUG: render() - aloitus');
-      console.log('🔧 DEBUG: state.all.length:', state.all.length);
-      console.log('🔧 DEBUG: state.mode:', state.mode);
-      console.log('🔧 DEBUG: state.rangeHours:', state.rangeHours);
-      
       if(!state.all.length) return;
 
       const window = sliceWindow(state.all, state.mode, state.rangeHours);
-      console.log('🔧 DEBUG: window.length:', window.length);
       ui.modeLabel.textContent = state.mode === 'future' ? 'Tulevat' : 'Menneet';
       ui.chartTitle.textContent = state.mode === 'future' ? 'Tulevat hinnat' : 'Menneet hinnat';
       ui.rangeLabel.textContent = `${state.rangeHours}h`;
@@ -553,36 +574,18 @@
       ui.cheapList.innerHTML = cheapest.map(e => liHtml(e, priceClass(e.price, stats.q1, stats.q3))).join('');
       ui.expList.innerHTML = expensive.map(e => liHtml(e, priceClass(e.price, stats.q1, stats.q3))).join('');
 
-      // Tiles
-      console.log('🔧 DEBUG: Renderöidään tiles, määrä:', window.length);
+      // Tiles - aggregoi tunteiksi
+      const hourlyData = aggregateToHours(window);
+      const hourlyStats = calcStats(hourlyData);
+      console.log('🔧 DEBUG: Renderöidään', hourlyData.length, 'tuntia tilesiin');
+      
       ui.tiles.innerHTML = '';
-      
-      // Debug parent widths
-      const debugElement = (el, name) => {
-        if (!el) {
-          console.log(`🔧 DEBUG: ${name} - EI LÖYDY`);
-          return;
-        }
-        console.log(`🔧 DEBUG: ${name} - offsetWidth: ${el.offsetWidth}, clientWidth: ${el.clientWidth}, scrollWidth: ${el.scrollWidth}`);
-        const computed = window.getComputedStyle(el);
-        console.log(`🔧 DEBUG: ${name} - width: ${computed.width}, max-width: ${computed.maxWidth}, padding: ${computed.paddingLeft}/${computed.paddingRight}`);
-      };
-      
-      debugElement(ui.tiles, 'tiles');
-      let parent = ui.tiles.parentElement;
-      let level = 1;
-      while (parent && level <= 5) {
-        debugElement(parent, `parent level ${level} (${parent.className || parent.tagName})`);
-        parent = parent.parentElement;
-        level++;
-      }
-      
-      for(const e of window){
+      for(const e of hourlyData){
         const tile = document.createElement('button');
         tile.type = 'button';
         tile.className = 'tile';
-        tile.style.background = tileBg(e.price, stats.q1, stats.q3);
-        tile.style.borderColor = tileBorder(e.price, stats.q1, stats.q3);
+        tile.style.background = tileBg(e.price, hourlyStats.q1, hourlyStats.q3);
+        tile.style.borderColor = tileBorder(e.price, hourlyStats.q1, hourlyStats.q3);
         tile.setAttribute('aria-label', `${formatFiTime(e.start)}: ${formatPrice(e.price)} snt / kWh`);
         tile.innerHTML = `
           <div class="time">${formatFiTime(e.start)}</div>
@@ -591,8 +594,6 @@
         tile.addEventListener('click', () => showToast(`${formatFiTime(e.start)} · ${formatPrice(e.price)} snt/kWh`));
         ui.tiles.appendChild(tile);
       }
-      console.log('🔧 DEBUG: Tiles renderöity, tiles container width:', ui.tiles.offsetWidth);
-      console.log('🔧 DEBUG: Tiles grid computed style:', window.getComputedStyle(ui.tiles).gridTemplateColumns);
 
       drawChart(window);
     }
