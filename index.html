@@ -559,16 +559,23 @@
       
       // Debug parent widths
       const debugElement = (el, name) => {
+        if (!el) {
+          console.log(`🔧 DEBUG: ${name} - EI LÖYDY`);
+          return;
+        }
         console.log(`🔧 DEBUG: ${name} - offsetWidth: ${el.offsetWidth}, clientWidth: ${el.clientWidth}, scrollWidth: ${el.scrollWidth}`);
         const computed = window.getComputedStyle(el);
-        console.log(`🔧 DEBUG: ${name} - width: ${computed.width}, max-width: ${computed.maxWidth}, box-sizing: ${computed.boxSizing}`);
+        console.log(`🔧 DEBUG: ${name} - width: ${computed.width}, max-width: ${computed.maxWidth}, padding: ${computed.paddingLeft}/${computed.paddingRight}`);
       };
       
       debugElement(ui.tiles, 'tiles');
-      debugElement(ui.tiles.parentElement, 'tiles.parent (.heat)');
-      debugElement(ui.tiles.parentElement.parentElement, 'tiles.parent.parent');
-      debugElement(document.querySelector('.grid'), 'grid');
-      debugElement(document.querySelector('.wrap'), 'wrap');
+      let parent = ui.tiles.parentElement;
+      let level = 1;
+      while (parent && level <= 5) {
+        debugElement(parent, `parent level ${level} (${parent.className || parent.tagName})`);
+        parent = parent.parentElement;
+        level++;
+      }
       
       for(const e of window){
         const tile = document.createElement('button');
