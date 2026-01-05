@@ -362,9 +362,12 @@
     }
 
     function formatFiTime(d){
-      return new Intl.DateTimeFormat('fi-FI', {
-        weekday:'short', hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'
-      }).format(d);
+      const weekday = new Intl.DateTimeFormat('fi-FI', {weekday:'short'}).format(d);
+      const day = d.getDate();
+      const month = d.getMonth() + 1;
+      const hour = String(d.getHours()).padStart(2, '0');
+      const minute = String(d.getMinutes()).padStart(2, '0');
+      return `${weekday} ${day}.${month}. klo ${hour}.${minute}`;
     }
 
     function quantile(sortedArr, q){
@@ -388,6 +391,8 @@
     }
 
     function formatPrice(p){ return (Math.round(p * 100) / 100).toFixed(2); }
+    
+    function formatPriceChart(p){ return Math.round(p).toString(); }
 
     function tileBg(p, q1, q3){
       if(p <= q1) return 'rgba(83, 209, 138, .22)';
@@ -395,9 +400,9 @@
       return 'rgba(255, 209, 102, .18)';
     }
     function tileBorder(p, q1, q3){
-      if(p <= q1) return 'rgba(83, 209, 138, .40)';
-      if(p >= q3) return 'rgba(255, 92, 122, .40)';
-      return 'rgba(255, 209, 102, .30)';
+      if(p <= q1) return 'rgb(83, 209, 138)';  // Kirkas vihreä
+      if(p >= q3) return 'rgb(255, 92, 122)';  // Kirkas punainen
+      return 'rgb(255, 209, 102)';             // Kirkas keltainen
     }
     function priceClass(p, q1, q3){
       if(p <= q1) return 'good';
@@ -569,10 +574,10 @@
         ${nowMarkup}
         <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(255,255,255,.10)" stroke-width="1.5" />
         <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(255,255,255,.10)" stroke-width="1.5" />
-        <text x="${padL}" y="${H-18}" fill="rgba(255,255,255,.80)" font-size="15" font-weight="600" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${startLbl}</text>
-        <text x="${W-padR}" y="${H-18}" fill="rgba(255,255,255,.80)" font-size="15" font-weight="600" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${endLbl}</text>
-        <text x="${padL-10}" y="${y(max)+5}" fill="rgba(255,255,255,.90)" font-size="16" font-weight="800" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${formatPrice(max)}</text>
-        <text x="${padL-10}" y="${y(min)+5}" fill="rgba(255,255,255,.90)" font-size="16" font-weight="800" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${formatPrice(min)}</text>
+        <text x="${padL}" y="${H-18}" fill="rgb(255,255,255)" font-size="17" font-weight="700" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${startLbl}</text>
+        <text x="${W-padR}" y="${H-18}" fill="rgb(255,255,255)" font-size="17" font-weight="700" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${endLbl}</text>
+        <text x="${padL-10}" y="${y(max)+5}" fill="rgb(255,255,255)" font-size="20" font-weight="900" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${formatPriceChart(max)}</text>
+        <text x="${padL-10}" y="${y(min)+5}" fill="rgb(255,255,255)" font-size="20" font-weight="900" text-anchor="end" font-family="${getComputedStyle(document.documentElement).getPropertyValue('--mono')}">${formatPriceChart(min)}</text>
       `;
       
       // Lisätään interaktiivisuus - tooltip näyttää hinnan koskettaessa/hoverissa
